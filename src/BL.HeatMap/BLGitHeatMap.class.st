@@ -22,15 +22,22 @@ branch := repo allBranches detect: [ :branch | branch name endsWith: 'master' ].
 | gitHeatMap repo |
 gitHeatMap := BLGitHeatMap new
 	repository: repo;
+	branchName: 'main';
 	maxNumber: 10.
+```
+4. Open the visualization
+```
+| gitHeatMap |
+gitHeatMap open
 ```
 "
 Class {
 	#name : #BLGitHeatMap,
-	#superclass : #HSimpleVisualizationBuilder,
+	#superclass : #Object,
 	#instVars : [
 		'repository',
-		'maxNumber'
+		'maxNumber',
+		'branchName'
 	],
 	#category : #'BL.HeatMap'
 }
