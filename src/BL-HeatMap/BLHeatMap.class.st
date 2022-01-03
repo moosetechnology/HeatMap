@@ -9,7 +9,7 @@ Class {
 		'colorMax',
 		'colorMin'
 	],
-	#category : #'BL.HeatMap'
+	#category : #'BL-HeatMap'
 }
 
 { #category : #building }
