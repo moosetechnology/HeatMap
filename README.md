@@ -4,6 +4,10 @@ A heat map browser of the last modification of a git repository
 
 ## Installation
 
+- Install a MooseImage (or better, [MooseBL image](https://gitlab.forge.berger-levrault.com/Benoit.VERHAEGHE/bl-moose)).
+- Clone the project with Iceberg.
+- Install the default baseline.
+
 ## Usage
 
 To use this heat map: 
