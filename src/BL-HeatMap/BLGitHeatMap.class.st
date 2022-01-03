@@ -112,7 +112,7 @@ BLGitHeatMap >> repository: anObject [
 { #category : #'private - accessing' }
 BLGitHeatMap >> walker [
 	| branch |
-	branch := self repository allBranches detect: [ :branch2 | branch2 name endsWith: 'master' ].
+	branch := self repository allBranches detect: [ :branch2 | branch2 name endsWith: self branchName ].
 	^ self repository newCommitWalk
 		fromBranch: branch;
 		maxNumber: self maxNumber
