@@ -21,17 +21,16 @@ BLHeatMap >> build [
 
 { #category : #building }
 BLHeatMap >> buildElementNode: anElement [
+
 	| elementValue |
-	elementValue := (property value: anElement).
+	elementValue := property value: anElement.
 	self updateValueRange: elementValue.
 
-	^HValuedNode new
-		name: anElement name ;
-		rawModel: anElement ;
-		value: elementValue ;
-		yourself
-	
-
+	^ BLValuedNode new
+		  name: anElement printString;
+		  rawModel: anElement;
+		  value: elementValue;
+		  yourself
 ]
 
 { #category : #building }

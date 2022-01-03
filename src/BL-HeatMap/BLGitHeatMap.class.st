@@ -86,8 +86,15 @@ BLGitHeatMap >> maxNumber: anObject [
 
 { #category : #api }
 BLGitHeatMap >> open [
+
 	"Open the GitHeatMap based on the repository"
-	self frequences
+
+	| frequences |
+	frequences := self frequences.
+	BLHeatMap new
+		elements: frequences keys;
+		property: [ :key | frequences at: key ];
+		open
 ]
 
 { #category : #accessing }
