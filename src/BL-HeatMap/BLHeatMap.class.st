@@ -12,6 +12,17 @@ Class {
 	#category : #'BL-HeatMap'
 }
 
+{ #category : #accessing }
+BLHeatMap >> borderFor: node [
+
+	^ RSBorder new
+		  width: 1;
+		  capSquare;
+		  joinMiter;
+		  color: Smalltalk ui theme textColor;
+		  yourself
+]
+
 { #category : #building }
 BLHeatMap >> build [
 	self buildNodes.
@@ -27,7 +38,7 @@ BLHeatMap >> buildElementNode: anElement [
 	self updateValueRange: elementValue.
 
 	^ BLValuedNode new
-		  name: anElement printString;
+		  name: elementValue printString, ' | ', anElement printString;
 		  rawModel: anElement;
 		  value: elementValue;
 		  yourself

@@ -39,9 +39,11 @@ Class {
 		'maxNumber',
 		'branchName',
 		'dictionnaryClassFrequence',
+		'dictionnaryJiraFrequence',
 		'packagesList',
 		'heatMap',
-		'heatMapBuilder'
+		'heatMapBuilder',
+		'buttonUnselect'
 	],
 	#category : #'BL-HeatMap'
 }
@@ -49,8 +51,14 @@ Class {
 { #category : #api }
 BLGitHeatMap class >> defaultSpec [
 
+	"unselectAll"
+
 	^ SpBoxLayout newLeftToRight
-		  add: #packagesList width: self buttonWidth * 2;
+		  add: (SpBoxLayout newTopToBottom
+				   add: #buttonUnselect height: self buttonHeight;
+				   add: #packagesList;
+				   yourself)
+		  width: self buttonWidth * 2;
 		  add: #heatMap;
 		  yourself
 ]
@@ -77,33 +85,52 @@ BLGitHeatMap >> frequences [
 
 	"return the frequence of changes for each class"
 
-	| dictionnaryClassFrequence |
-	dictionnaryClassFrequence := Dictionary new.
 	self walker commitsDo: [ :commit | 
+		| tag |
+		tag := commit comment first == $[
+			       ifTrue: [ commit comment allButFirst copyUpTo: $] ]
+			       ifFalse: [ nil ].
 		(commit changesFromCommit: commit ancestors first) do: [ :change | 
-			| fileChanged |
+			| fileChanged tagDictionnary |
 			fileChanged := change path segments last.
+
 			dictionnaryClassFrequence at: fileChanged ifAbsentPut: 0.
 			dictionnaryClassFrequence
 				at: fileChanged
-				put: (dictionnaryClassFrequence at: fileChanged) + 1 ] ].
-	^ dictionnaryClassFrequence
+				put: (dictionnaryClassFrequence at: fileChanged) + 1.
+			tag ifNotNil: [ 
+				tagDictionnary := dictionnaryJiraFrequence
+					                  at: tag
+					                  ifAbsentPut: Dictionary new.
+				tagDictionnary at: fileChanged ifAbsentPut: 0.
+				"already added + 1"
+				tagDictionnary
+					at: fileChanged
+					put: (dictionnaryClassFrequence at: fileChanged) ] ] ]
 ]
 
 { #category : #api }
 BLGitHeatMap >> initialize [
+
 	super initialize.
 	maxNumber := 10.
+	dictionnaryJiraFrequence := Dictionary new.
+	dictionnaryClassFrequence := Dictionary new
 ]
 
 { #category : #api }
 BLGitHeatMap >> initializePresenters [
 
-	packagesList := self newList.
+	packagesList := self newList whenSelectedDo: [ :item | 
+		                self packageSelected: item ].
+	buttonUnselect := self newButton whenActivatedDo: [ 
+		                  packagesList unselectAll.
+		                  self packageAllUnselected ].
+	buttonUnselect label: 'Unselect all'.
 	heatMap := SpRoassalPresenter new.
 	heatMapBuilder := BLHeatMap new
 		                  container: heatMap canvas;
-		                  yourself.
+		                  yourself
 ]
 
 { #category : #accessing }
@@ -120,11 +147,36 @@ BLGitHeatMap >> maxNumber: anObject [
 ]
 
 { #category : #api }
-BLGitHeatMap >> refreshDiagram [
+BLGitHeatMap >> packageAllUnselected [
 
 	heatMap refresh.
-	dictionnaryClassFrequence := self frequences.
-	packagesList items: dictionnaryClassFrequence keys.
+	heatMapBuilder property: [ :key | dictionnaryClassFrequence at: key ].
+	heatMapBuilder container: heatMap canvas.
+	heatMapBuilder build.
+
+	heatMap canvas zoomToFit
+]
+
+{ #category : #api }
+BLGitHeatMap >> packageSelected: item [
+
+	heatMap refresh.
+	heatMapBuilder property: [ :property | 
+		(dictionnaryJiraFrequence at: item) at: property ifAbsent: [ 0 ] ].
+	heatMapBuilder container: heatMap canvas.
+	heatMapBuilder build.
+
+	heatMap canvas zoomToFit
+]
+
+{ #category : #api }
+BLGitHeatMap >> refreshDiagram [
+
+	dictionnaryClassFrequence := Dictionary new.
+	dictionnaryJiraFrequence := Dictionary new.
+	self frequences.
+	heatMap refresh.
+	packagesList items: dictionnaryJiraFrequence keys.
 	heatMapBuilder
 		elements: dictionnaryClassFrequence keys;
 		property: [ :key | dictionnaryClassFrequence at: key ].
