@@ -33,14 +33,32 @@ gitHeatMap open
 "
 Class {
 	#name : #BLGitHeatMap,
-	#superclass : #Object,
+	#superclass : #SpPresenter,
 	#instVars : [
 		'repository',
 		'maxNumber',
-		'branchName'
+		'branchName',
+		'dictionnaryClassFrequence',
+		'packagesList',
+		'heatMap',
+		'heatMapBuilder'
 	],
 	#category : #'BL-HeatMap'
 }
+
+{ #category : #api }
+BLGitHeatMap class >> defaultSpec [
+
+	^ SpBoxLayout newLeftToRight
+		  add: #packagesList width: self buttonWidth * 2;
+		  add: #heatMap;
+		  yourself
+]
+
+{ #category : #api }
+BLGitHeatMap class >> title [
+	^ 'Git HeatMap explorer'
+]
 
 { #category : #accessing }
 BLGitHeatMap >> branchName [
@@ -72,6 +90,22 @@ BLGitHeatMap >> frequences [
 	^ dictionnaryClassFrequence
 ]
 
+{ #category : #api }
+BLGitHeatMap >> initialize [
+	super initialize.
+	maxNumber := 10.
+]
+
+{ #category : #api }
+BLGitHeatMap >> initializePresenters [
+
+	packagesList := self newList.
+	heatMap := SpRoassalPresenter new.
+	heatMapBuilder := BLHeatMap new
+		                  container: heatMap canvas;
+		                  yourself.
+]
+
 { #category : #accessing }
 BLGitHeatMap >> maxNumber [
 
@@ -81,20 +115,23 @@ BLGitHeatMap >> maxNumber [
 { #category : #accessing }
 BLGitHeatMap >> maxNumber: anObject [
 
-	maxNumber := anObject
+	maxNumber := anObject.
+	self refreshDiagram
 ]
 
 { #category : #api }
-BLGitHeatMap >> open [
+BLGitHeatMap >> refreshDiagram [
 
-	"Open the GitHeatMap based on the repository"
+	heatMap refresh.
+	dictionnaryClassFrequence := self frequences.
+	packagesList items: dictionnaryClassFrequence keys.
+	heatMapBuilder
+		elements: dictionnaryClassFrequence keys;
+		property: [ :key | dictionnaryClassFrequence at: key ].
+	heatMapBuilder container: heatMap canvas.
+	heatMapBuilder build.
 
-	| frequences |
-	frequences := self frequences.
-	BLHeatMap new
-		elements: frequences keys;
-		property: [ :key | frequences at: key ];
-		open
+	heatMap canvas zoomToFit
 ]
 
 { #category : #accessing }
@@ -106,7 +143,8 @@ BLGitHeatMap >> repository [
 { #category : #accessing }
 BLGitHeatMap >> repository: anObject [
 
-	repository := anObject
+	repository := anObject.
+	self refreshDiagram
 ]
 
 { #category : #'private - accessing' }

@@ -35,20 +35,24 @@ BLHeatMap >> buildElementNode: anElement [
 
 { #category : #building }
 BLHeatMap >> buildNodes [
+
 	| allNodes |
 	rootNode := HNode new.
-	allNodes := elements collect: [ :elt | self buildElementNode: elt].
+	allNodes := elements collect: [ :elt | self buildElementNode: elt ].
 
-	colorPalette := (NSScale linear
-		range: {colorMin . colorMax} ;
-		domain: {valueMin .valueMax} ;
-		yourself ).
+	colorPalette := NSScale linear
+		                range: { 
+				                colorMin.
+				                colorMax };
+		                domain: { 
+				                valueMin.
+				                valueMax };
+		                yourself.
 
 	allNodes do: [ :node | self updateNodeColor: node ].
 	rootNode addAll: (allNodes sorted: [ :a :b | a value < b value ]).
 
-	super build
-	
+	"super build"
 ]
 
 { #category : #accessing }
@@ -88,13 +92,14 @@ BLHeatMap >> elements: anObject [
 ]
 
 { #category : #initialization }
-BLHeatMap >> initialize [ 
+BLHeatMap >> initialize [
+
 	super initialize.
 	valueMax := nil.
 	valueMin := nil.
 	colorMin := Color white.
 	colorMax := Color red.
-	elements := #().
+	elements := #(  ).
 	property := [ :elt | 0 ]
 ]
 
