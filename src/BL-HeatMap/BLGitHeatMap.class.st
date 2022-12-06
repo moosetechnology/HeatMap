@@ -48,8 +48,8 @@ Class {
 	#category : #'BL-HeatMap'
 }
 
-{ #category : #api }
-BLGitHeatMap class >> defaultSpec [
+{ #category : #layout }
+BLGitHeatMap class >> defaultLayout [
 
 	"unselectAll"
 
@@ -80,6 +80,12 @@ BLGitHeatMap >> branchName: anObject [
 	branchName := anObject
 ]
 
+{ #category : #accessing }
+BLGitHeatMap >> dictionnaryClassFrequence [
+
+	^ dictionnaryClassFrequence
+]
+
 { #category : #'private - accessing' }
 BLGitHeatMap >> frequences [
 
@@ -87,9 +93,12 @@ BLGitHeatMap >> frequences [
 
 	self walker commitsDo: [ :commit | 
 		| tag |
-		tag := commit comment first == $[
-			       ifTrue: [ commit comment allButFirst copyUpTo: $] ]
-			       ifFalse: [ nil ].
+		tag := commit comment
+			       ifNotEmpty: [ 
+				       commit comment first == $[
+					       ifTrue: [ commit comment allButFirst copyUpTo: $] ]
+					       ifFalse: [ nil ] ]
+			       ifEmpty: [ nil ].
 		(commit changesFromCommit: commit ancestors first) do: [ :change | 
 			| fileChanged tagDictionnary |
 			fileChanged := change path segments last.
