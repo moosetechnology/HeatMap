@@ -99,23 +99,24 @@ BLGitHeatMap >> frequences [
 					       ifTrue: [ commit comment allButFirst copyUpTo: $] ]
 					       ifFalse: [ nil ] ]
 			       ifEmpty: [ nil ].
-		(commit changesFromCommit: commit ancestors first) do: [ :change | 
-			| fileChanged tagDictionnary |
-			fileChanged := change path segments last.
+		commit ancestors ifNotEmpty: [ 
+			(commit changesFromCommit: commit ancestors first) do: [ :change | 
+				| fileChanged tagDictionnary |
+				fileChanged := change path segments last.
 
-			dictionnaryClassFrequence at: fileChanged ifAbsentPut: 0.
-			dictionnaryClassFrequence
-				at: fileChanged
-				put: (dictionnaryClassFrequence at: fileChanged) + 1.
-			tag ifNotNil: [ 
-				tagDictionnary := dictionnaryJiraFrequence
-					                  at: tag
-					                  ifAbsentPut: Dictionary new.
-				tagDictionnary at: fileChanged ifAbsentPut: 0.
-				"already added + 1"
-				tagDictionnary
+				dictionnaryClassFrequence at: fileChanged ifAbsentPut: 0.
+				dictionnaryClassFrequence
 					at: fileChanged
-					put: (dictionnaryClassFrequence at: fileChanged) ] ] ]
+					put: (dictionnaryClassFrequence at: fileChanged) + 1.
+				tag ifNotNil: [ 
+					tagDictionnary := dictionnaryJiraFrequence
+						                  at: tag
+						                  ifAbsentPut: Dictionary new.
+					tagDictionnary at: fileChanged ifAbsentPut: 0.
+					"already added + 1"
+					tagDictionnary
+						at: fileChanged
+						put: (dictionnaryClassFrequence at: fileChanged) ] ] ] ]
 ]
 
 { #category : #api }
