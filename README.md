@@ -4,21 +4,6 @@ A heat map browser of the last modification of a git repository
 
 ## Installation
 
-- Install a MooseImage (or better, [MooseBL image](https://gitlab.forge.berger-levrault.com/Benoit.VERHAEGHE/bl-moose)).
-- Clone the project with Iceberg.
-- Install the default baseline.
-
-### Form a playground
-
-```st
-Metacello new
-  repository: 'gitlab://gitlab.forge.berger-levrault.com:bl-drit/bl.drit.products/bl-moose/critics-integration/HeatMap:main/src';
-  baseline: 'CasinoSeditRHImporter';
-  onConflict: [ :ex | ex useIncoming ];
-  onUpgrade: [ :ex | ex useIncoming ];
-  onDowngrade: [ :ex | ex useLoaded ];
-  load
-```
 
 ## Usage
 
