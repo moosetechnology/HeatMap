@@ -43,7 +43,8 @@ Class {
 		'packagesList',
 		'heatMap',
 		'heatMapBuilder',
-		'buttonUnselect'
+		'buttonUnselect',
+		'toCommitish'
 	],
 	#category : #HeatMap
 }
@@ -123,7 +124,7 @@ HMGitHeatMap >> frequences [
 HMGitHeatMap >> initialize [
 
 	super initialize.
-	maxNumber := 10.
+	maxNumber := 0.
 	dictionnaryJiraFrequence := Dictionary new.
 	dictionnaryClassFrequence := Dictionary new
 ]
@@ -153,6 +154,7 @@ HMGitHeatMap >> maxNumber [
 HMGitHeatMap >> maxNumber: anObject [
 
 	maxNumber := anObject.
+	self toCommitish: nil.
 	self refreshDiagram
 ]
 
@@ -209,11 +211,35 @@ HMGitHeatMap >> repository: anObject [
 	self refreshDiagram
 ]
 
+{ #category : #accessing }
+HMGitHeatMap >> toCommitish [
+
+	^ toCommitish
+]
+
+{ #category : #accessing }
+HMGitHeatMap >> toCommitish: anObject [
+
+	toCommitish := anObject
+]
+
+{ #category : #accessing }
+HMGitHeatMap >> upToCommitish: aString [
+
+	toCommitish := aString.
+	self maxNumber: nil.
+	self refreshDiagram
+]
+
 { #category : #'private - accessing' }
 HMGitHeatMap >> walker [
-	| branch |
-	branch := self repository allBranches detect: [ :branch2 | branch2 name endsWith: self branchName ].
-	^ self repository newCommitWalk
-		fromBranch: branch;
-		maxNumber: self maxNumber
+
+	| branch walker |
+	branch := self repository allBranches detect: [ :branch2 |
+		          branch2 name endsWith: self branchName ].
+	walker := self repository newCommitWalk fromBranch: branch.
+	self maxNumber ifNotNil: [ :maxNum | walker maxNumber: maxNum ].
+	self toCommitish ifNotNil: [ :commitizzh |
+		walker revwalk hideCommit: (LGitId fromHexString: commitizzh) ].
+	^ walker
 ]
