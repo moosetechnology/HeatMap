@@ -1,11 +1,11 @@
 Class {
-	#name : #BaselineOfBLHeatMap,
+	#name : #BaselineOfHeatMap,
 	#superclass : #BaselineOf,
-	#category : #BaselineOfBLHeatMap
+	#category : #BaselineOfHeatMap
 }
 
 { #category : #baselines }
-BaselineOfBLHeatMap >> baseline: spec [
+BaselineOfHeatMap >> baseline: spec [
 	<baseline>
 	spec
 		for: #common
@@ -16,15 +16,15 @@ BaselineOfBLHeatMap >> baseline: spec [
 ]
 
 { #category : #baselines }
-BaselineOfBLHeatMap >> defineDependencies: spec [
+BaselineOfHeatMap >> defineDependencies: spec [
 ]
 
 { #category : #baselines }
-BaselineOfBLHeatMap >> defineGroups: spec [
+BaselineOfHeatMap >> defineGroups: spec [
 ]
 
 { #category : #baselines }
-BaselineOfBLHeatMap >> definePackages: spec [
+BaselineOfHeatMap >> definePackages: spec [
 
-	spec package: 'BL-HeatMap'
+	spec package: 'HeatMap'
 ]

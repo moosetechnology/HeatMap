@@ -32,7 +32,7 @@ gitHeatMap open
 ```
 "
 Class {
-	#name : #BLGitHeatMap,
+	#name : #HMGitHeatMap,
 	#superclass : #SpPresenter,
 	#instVars : [
 		'repository',
@@ -45,11 +45,11 @@ Class {
 		'heatMapBuilder',
 		'buttonUnselect'
 	],
-	#category : #'BL-HeatMap'
+	#category : #HeatMap
 }
 
 { #category : #layout }
-BLGitHeatMap class >> defaultLayout [
+HMGitHeatMap class >> defaultLayout [
 
 	"unselectAll"
 
@@ -64,30 +64,30 @@ BLGitHeatMap class >> defaultLayout [
 ]
 
 { #category : #api }
-BLGitHeatMap class >> title [
+HMGitHeatMap class >> title [
 	^ 'Git HeatMap explorer'
 ]
 
 { #category : #accessing }
-BLGitHeatMap >> branchName [
+HMGitHeatMap >> branchName [
 
 	^ branchName
 ]
 
 { #category : #accessing }
-BLGitHeatMap >> branchName: anObject [
+HMGitHeatMap >> branchName: anObject [
 
 	branchName := anObject
 ]
 
 { #category : #accessing }
-BLGitHeatMap >> dictionnaryClassFrequence [
+HMGitHeatMap >> dictionnaryClassFrequence [
 
 	^ dictionnaryClassFrequence
 ]
 
 { #category : #'private - accessing' }
-BLGitHeatMap >> frequences [
+HMGitHeatMap >> frequences [
 
 	"return the frequence of changes for each class"
 
@@ -120,7 +120,7 @@ BLGitHeatMap >> frequences [
 ]
 
 { #category : #api }
-BLGitHeatMap >> initialize [
+HMGitHeatMap >> initialize [
 
 	super initialize.
 	maxNumber := 10.
@@ -128,36 +128,21 @@ BLGitHeatMap >> initialize [
 	dictionnaryClassFrequence := Dictionary new
 ]
 
-{ #category : #api }
-BLGitHeatMap >> initializePresenters [
-
-	packagesList := self newList whenSelectedDo: [ :item | 
-		                self packageSelected: item ].
-	buttonUnselect := self newButton whenActivatedDo: [ 
-		                  packagesList unselectAll.
-		                  self packageAllUnselected ].
-	buttonUnselect label: 'Unselect all'.
-	heatMap := SpRoassalPresenter new.
-	heatMapBuilder := BLHeatMap new
-		                  container: heatMap canvas;
-		                  yourself
-]
-
 { #category : #accessing }
-BLGitHeatMap >> maxNumber [
+HMGitHeatMap >> maxNumber [
 
 	^ maxNumber
 ]
 
 { #category : #accessing }
-BLGitHeatMap >> maxNumber: anObject [
+HMGitHeatMap >> maxNumber: anObject [
 
 	maxNumber := anObject.
 	self refreshDiagram
 ]
 
 { #category : #api }
-BLGitHeatMap >> packageAllUnselected [
+HMGitHeatMap >> packageAllUnselected [
 
 	heatMap refresh.
 	heatMapBuilder property: [ :key | dictionnaryClassFrequence at: key ].
@@ -168,7 +153,7 @@ BLGitHeatMap >> packageAllUnselected [
 ]
 
 { #category : #api }
-BLGitHeatMap >> packageSelected: item [
+HMGitHeatMap >> packageSelected: item [
 
 	heatMap refresh.
 	heatMapBuilder property: [ :property | 
@@ -180,7 +165,7 @@ BLGitHeatMap >> packageSelected: item [
 ]
 
 { #category : #api }
-BLGitHeatMap >> refreshDiagram [
+HMGitHeatMap >> refreshDiagram [
 
 	dictionnaryClassFrequence := Dictionary new.
 	dictionnaryJiraFrequence := Dictionary new.
@@ -197,20 +182,20 @@ BLGitHeatMap >> refreshDiagram [
 ]
 
 { #category : #accessing }
-BLGitHeatMap >> repository [
+HMGitHeatMap >> repository [
 
 	^ repository
 ]
 
 { #category : #accessing }
-BLGitHeatMap >> repository: anObject [
+HMGitHeatMap >> repository: anObject [
 
 	repository := anObject.
 	self refreshDiagram
 ]
 
 { #category : #'private - accessing' }
-BLGitHeatMap >> walker [
+HMGitHeatMap >> walker [
 	| branch |
 	branch := self repository allBranches detect: [ :branch2 | branch2 name endsWith: self branchName ].
 	^ self repository newCommitWalk

@@ -1,5 +1,5 @@
 Class {
-	#name : #BLHeatMap,
+	#name : #HMHeatMap,
 	#superclass : #HSimpleVisualizationBuilder,
 	#instVars : [
 		'elements',
@@ -9,35 +9,24 @@ Class {
 		'colorMax',
 		'colorMin'
 	],
-	#category : #'BL-HeatMap'
+	#category : #HeatMap
 }
 
-{ #category : #accessing }
-BLHeatMap >> borderFor: node [
-
-	^ RSBorder new
-		  width: 1;
-		  capSquare;
-		  joinMiter;
-		  color: Smalltalk ui theme textColor;
-		  yourself
-]
-
 { #category : #building }
-BLHeatMap >> build [
+HMHeatMap >> build [
 	self buildNodes.
 	super build
 	
 ]
 
 { #category : #building }
-BLHeatMap >> buildElementNode: anElement [
+HMHeatMap >> buildElementNode: anElement [
 
 	| elementValue |
 	elementValue := property value: anElement.
 	self updateValueRange: elementValue.
 
-	^ BLValuedNode new
+	^ HMValuedNode new
 		  name: elementValue printString, ' | ', anElement printString;
 		  rawModel: anElement;
 		  value: elementValue;
@@ -45,7 +34,7 @@ BLHeatMap >> buildElementNode: anElement [
 ]
 
 { #category : #building }
-BLHeatMap >> buildNodes [
+HMHeatMap >> buildNodes [
 
 	| allNodes |
 	rootNode := HNode new.
@@ -67,43 +56,43 @@ BLHeatMap >> buildNodes [
 ]
 
 { #category : #accessing }
-BLHeatMap >> colorMax [
+HMHeatMap >> colorMax [
 
 	^ colorMax
 ]
 
 { #category : #accessing }
-BLHeatMap >> colorMax: anObject [
+HMHeatMap >> colorMax: anObject [
 
 	colorMax := anObject
 ]
 
 { #category : #accessing }
-BLHeatMap >> colorMin [
+HMHeatMap >> colorMin [
 
 	^ colorMin
 ]
 
 { #category : #accessing }
-BLHeatMap >> colorMin: anObject [
+HMHeatMap >> colorMin: anObject [
 
 	colorMin := anObject
 ]
 
 { #category : #accessing }
-BLHeatMap >> elements [
+HMHeatMap >> elements [
 
 	^ elements
 ]
 
 { #category : #accessing }
-BLHeatMap >> elements: anObject [
+HMHeatMap >> elements: anObject [
 
 	elements := anObject
 ]
 
 { #category : #initialization }
-BLHeatMap >> initialize [
+HMHeatMap >> initialize [
 
 	super initialize.
 	valueMax := nil.
@@ -115,26 +104,26 @@ BLHeatMap >> initialize [
 ]
 
 { #category : #accessing }
-BLHeatMap >> property [
+HMHeatMap >> property [
 
 	^ property
 ]
 
 { #category : #accessing }
-BLHeatMap >> property: anObject [
+HMHeatMap >> property: anObject [
 
 	property := anObject
 ]
 
 { #category : #building }
-BLHeatMap >> updateNodeColor: node [
+HMHeatMap >> updateNodeColor: node [
 	node color: (colorPalette scale: node level).
 	node children do: [ :child| self updateNodeColor: child ].
 	
 ]
 
 { #category : #building }
-BLHeatMap >> updateValueRange: aValue [
+HMHeatMap >> updateValueRange: aValue [
 
 	valueMin
 		ifNil: [ valueMin := aValue ]
@@ -145,13 +134,13 @@ BLHeatMap >> updateValueRange: aValue [
 ]
 
 { #category : #accessing }
-BLHeatMap >> valueMax [
+HMHeatMap >> valueMax [
 
 	^ valueMax
 ]
 
 { #category : #accessing }
-BLHeatMap >> valueMin [
+HMHeatMap >> valueMin [
 
 	^ valueMin
 ]

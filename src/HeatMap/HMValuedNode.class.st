@@ -1,25 +1,25 @@
 Class {
-	#name : #BLValuedNode,
+	#name : #HMValuedNode,
 	#superclass : #HNode,
 	#instVars : [
 		'value'
 	],
-	#category : #'BL-HeatMap'
+	#category : #HeatMap
 }
 
 { #category : #accessing }
-BLValuedNode >> level [
+HMValuedNode >> level [
 	"compatibility with HSimpleVisualizationBuilder"
 	^self value
 ]
 
 { #category : #accessing }
-BLValuedNode >> value [
+HMValuedNode >> value [
 	^ value
 ]
 
 { #category : #accessing }
-BLValuedNode >> value: anObject [
+HMValuedNode >> value: anObject [
 
 	value := anObject
 ]
