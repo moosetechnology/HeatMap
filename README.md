@@ -30,7 +30,7 @@ To use this heat map:
     ```
 3. Configure the GitHeatMap
     ```st
-    gitHeatMap := BLGitHeatMap new
+    gitHeatMap := HMGitHeatMap new
         repository: repo;
         branchName: 'main';
         maxNumber: 10.
