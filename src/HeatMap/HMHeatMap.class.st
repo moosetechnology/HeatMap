@@ -25,9 +25,10 @@ HMHeatMap >> borderFor: node [
 
 { #category : #building }
 HMHeatMap >> build [
+
 	self buildNodes.
-	super build
-	
+	super build.
+	self container @ RSCanvasController
 ]
 
 { #category : #building }
