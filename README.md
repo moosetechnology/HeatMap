@@ -24,18 +24,14 @@ To use this heat map:
         initBare: false;
         yourself.
     ```
-2. Select a branch to explore
-    ```st
-    branch := repo allBranches detect: [ :branch | branch name endsWith: 'master' ].
-    ```
-3. Configure the GitHeatMap
+2. Configure the GitHeatMap
     ```st
     gitHeatMap := HMGitHeatMap new
-        repository: repo;
         branchName: 'main';
+        repository: repo;
         maxNumber: 10.
     ```
-4. Open the visualization
+3. Open the visualization
     ```st
     gitHeatMap open
     ```
