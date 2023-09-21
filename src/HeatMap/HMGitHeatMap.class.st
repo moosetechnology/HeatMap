@@ -128,6 +128,21 @@ HMGitHeatMap >> initialize [
 	dictionnaryClassFrequence := Dictionary new
 ]
 
+{ #category : #initialization }
+HMGitHeatMap >> initializePresenters [
+
+	packagesList := self newList whenSelectedDo: [ :item | 
+		                self packageSelected: item ].
+	buttonUnselect := self newButton whenActivatedDo: [ 
+		                  packagesList unselectAll.
+		                  self packageAllUnselected ].
+	buttonUnselect label: 'Unselect all'.
+	heatMap := SpRoassalPresenter new.
+	heatMapBuilder := HMHeatMap new
+		                  container: heatMap canvas;
+		                  yourself
+]
+
 { #category : #accessing }
 HMGitHeatMap >> maxNumber [
 

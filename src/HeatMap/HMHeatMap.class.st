@@ -12,6 +12,17 @@ Class {
 	#category : #HeatMap
 }
 
+{ #category : #'public - hooks' }
+HMHeatMap >> borderFor: node [
+
+	^ RSBorder new
+		  width: 1;
+		  capSquare;
+		  joinMiter;
+		  color: Smalltalk ui theme textColor;
+		  yourself
+]
+
 { #category : #building }
 HMHeatMap >> build [
 	self buildNodes.
