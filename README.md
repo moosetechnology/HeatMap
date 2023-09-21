@@ -4,6 +4,12 @@ A heat map browser of the last modification of a git repository
 
 ## Installation
 
+```st
+Metacello new
+  baseline: 'HeatMap';
+  repository: 'github://moosetechnology/HeatMap:main/src';
+  load.
+```
 
 ## Usage
 
