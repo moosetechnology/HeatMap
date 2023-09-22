@@ -1,5 +1,16 @@
 "
-## Usage
+## Builder config
+
+**Mandatory**
+
+- `rootDirectory:`: the path to the directory root of the file heat map
+- `fileValueBlock:`: the way to compute the hot of a file
+
+**Optional**
+
+- `collapseBlock:`: executed after `fileValueBlock:`, it should return a boolean to indicate if the node should be collapse or not by default. Default value is true
+
+## Example
 
 ```st
 fileHeatMap := HMFileHeatMap new.
@@ -17,7 +28,8 @@ Class {
 		'maxValue',
 		'minValue',
 		'colorPalette',
-		'fileValueBlock'
+		'fileValueBlock',
+		'collapseBlock'
 	],
 	#category : #HeatMap
 }
@@ -41,6 +53,18 @@ HMFileHeatMap >> build [
 		                yourself.
 
 	self updateNode: rootNode
+]
+
+{ #category : #accessing }
+HMFileHeatMap >> collapseBlock [
+
+	^ collapseBlock
+]
+
+{ #category : #accessing }
+HMFileHeatMap >> collapseBlock: anObject [
+
+	collapseBlock := anObject
 ]
 
 { #category : #accessing }
@@ -74,7 +98,6 @@ HMFileHeatMap >> hnodesFrom: aFileReference [
 		  | node |
 		  node := HMValuedNode new
 			          rawModel: child;
-			          collapse;
 			          style: HMFileHeatMapStyle new;
 			          yourself.
 		  child isDirectory
@@ -82,6 +105,7 @@ HMFileHeatMap >> hnodesFrom: aFileReference [
 				  node addAll: (self hnodesFrom: child).
 				  node value: (node children max: #value) ]
 			  ifFalse: [ node value: (self fileValueBlock value: child) ].
+		  (self collapseBlock value: node) ifTrue: [ node collapse ].
 		  node name: node value printString , ' | ' , child basename.
 		  node ]
 ]
@@ -91,7 +115,8 @@ HMFileHeatMap >> initialize [
 
 	super initialize.
 	maxValue := 0.
-	minValue := 0
+	minValue := 0.
+	collapseBlock := [ :node | true ]
 ]
 
 { #category : #accessing }
