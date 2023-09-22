@@ -55,6 +55,15 @@ HMFileHeatMap >> build [
 	self updateNode: rootNode
 ]
 
+{ #category : #building }
+HMFileHeatMap >> buildLayoutFor: node [
+
+	^ RSFlowLayout new
+		alignment: #middle;
+		gapSize: 10;
+		yourself
+]
+
 { #category : #accessing }
 HMFileHeatMap >> collapseBlock [
 
@@ -95,22 +104,20 @@ HMFileHeatMap >> fileValueBlock: anObject [
 HMFileHeatMap >> hnodesFrom: aFileReference [
 
 	^ (aFileReference children collect: [ :child |
-		  | node |
-		  node := HMValuedNode new
-			          rawModel: child;
-			          layout: (RSFlowLayout new
-					           alignment: #middle;
-					           yourself);
-			          style: HMFileHeatMapStyle new;
-			          yourself.
-		  child isDirectory
-			  ifTrue: [
-				  node addAll: (self hnodesFrom: child).
-				  node value: (node children max: #value) ]
-			  ifFalse: [ node value: (self fileValueBlock value: child) ].
-		  (self collapseBlock value: node) ifTrue: [ node collapse ].
-		  node name: node value printString , ' | ' , child basename.
-		  node ]) sorted: #value descending 
+		   | node |
+		   node := HMValuedNode new
+			           rawModel: child;
+			           style: HMFileHeatMapStyle new;
+			           yourself.
+		   node layout: (self buildLayoutFor: node).
+		   child isDirectory
+			   ifTrue: [
+				   node addAll: (self hnodesFrom: child).
+				   node value: (node children max: #value) ]
+			   ifFalse: [ node value: (self fileValueBlock value: child) ].
+		   (self collapseBlock value: node) ifTrue: [ node collapse ].
+		   node name: node value printString , ' | ' , child basename.
+		   node ]) sorted: #value descending
 ]
 
 { #category : #accessing }
