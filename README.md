@@ -41,9 +41,29 @@ To use this heat map:
 You can also build a file heat map with the following piece of code:
 
 ```st
+"Set up iceberg to the git project to analyse"
+repo := IceLibgitRepository new
+    name: 'seditRH';
+    location: ('D:\Dev\my\path' asFileReference);
+    initBare: false;
+    yourself.
+
+"Analyse the git history to retrieve all file modified"
+gitFreq := HMGitFileFrequenceExtractor new
+    branchName: 'master';
+    repository: repo;
+    upToCommitish:  '<full commit id>';
+    yourself.
+gitFreq computeFrequences.
+
+"Build a fileFeatMap upon this first analysis"
 fileHeatMap := HMFileHeatMap new.
-fileHeatMap rootDirectory: 'D:\Dev\seditRH\e-sedit-rh\BLGRHServer\src\main\java\fr'.
+fileHeatMap rootDirectory: 'D:\Dev\my\path'.
+
+fileHeatMap hideNodeBlock: [ :node | node value < 20 ].
 fileHeatMap fileValueBlock: [ :child | gitFreq dictionnaryClassFrequence at: child basename ifAbsent: [ 0 ] ].
+fileHeatMap collapseBlock: [ :node | node value <= 50 ].
+
 fileHeatMap build.
 fileHeatMap rootNode open
 ```
