@@ -72,7 +72,7 @@ HMFileHeatMap >> hnodesFrom: aFileReference [
 
 	^ aFileReference children collect: [ :child |
 		  | node |
-		  node := (HMValuedNode named: child basename)
+		  node := HMValuedNode new
 			          rawModel: child;
 			          collapse;
 			          yourself.
@@ -81,6 +81,7 @@ HMFileHeatMap >> hnodesFrom: aFileReference [
 				  node addAll: (self hnodesFrom: child).
 				  node value: (node children max: #value) ]
 			  ifFalse: [ node value: (self fileValueBlock value: child) ].
+		  node name: node value printString , ' | ' , child basename.
 		  node ]
 ]
 
