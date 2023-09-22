@@ -13,7 +13,7 @@ Metacello new
 
 ## Usage
 
-To use this heat map: 
+To use this heat map:
 
 1. Create a repository using LibGit
     ```st
@@ -35,3 +35,15 @@ To use this heat map:
     ```st
     gitHeatMap open
     ```
+
+## File HeatMap
+
+You can also build a file heat map with the following piece of code:
+
+```st
+fileHeatMap := HMFileHeatMap new.
+fileHeatMap rootDirectory: 'D:\Dev\seditRH\e-sedit-rh\BLGRHServer\src\main\java\fr'.
+fileHeatMap fileValueBlock: [ :child | gitFreq dictionnaryClassFrequence at: child basename ifAbsent: [ 0 ] ].
+fileHeatMap build.
+fileHeatMap rootNode open
+```
