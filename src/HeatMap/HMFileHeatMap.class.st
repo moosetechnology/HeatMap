@@ -16,6 +16,7 @@
 ```st
 fileHeatMap := HMFileHeatMap new.
 fileHeatMap rootDirectory: '/path/to/directory'.
+fileHeatMap fileValueBlock: [ :child | child basename asString size ].
 fileHeatMap build.
 fileHeatMap rootNode open
 
