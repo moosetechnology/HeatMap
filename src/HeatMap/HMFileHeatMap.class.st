@@ -9,6 +9,7 @@
 **Optional**
 
 - `collapseBlock:`: executed after `fileValueBlock:`, it should return a boolean to indicate if the node should be collapse or not by default. Default value is true
+- `hideFileBlock:`: return `true` for the files that do not need to create a node in the visualisation
 
 ## Example
 
@@ -29,7 +30,8 @@ Class {
 		'minValue',
 		'colorPalette',
 		'fileValueBlock',
-		'collapseBlock'
+		'collapseBlock',
+		'hideNodeBlock'
 	],
 	#category : #HeatMap
 }
@@ -100,24 +102,39 @@ HMFileHeatMap >> fileValueBlock: anObject [
 	fileValueBlock := anObject
 ]
 
+{ #category : #accessing }
+HMFileHeatMap >> hideNodeBlock [
+
+	^ hideNodeBlock
+]
+
+{ #category : #accessing }
+HMFileHeatMap >> hideNodeBlock: anObject [
+
+	hideNodeBlock := anObject
+]
+
 { #category : #building }
 HMFileHeatMap >> hnodesFrom: aFileReference [
 
-	^ (aFileReference children collect: [ :child |
-		   | node |
-		   node := HMValuedNode new
-			           rawModel: child;
-			           style: HMFileHeatMapStyle new;
-			           yourself.
-		   node layout: (self buildLayoutFor: node).
-		   child isDirectory
-			   ifTrue: [
-				   node addAll: (self hnodesFrom: child).
-				   node value: (node children max: #value) ]
-			   ifFalse: [ node value: (self fileValueBlock value: child) ].
-		   (self collapseBlock value: node) ifTrue: [ node collapse ].
-		   node name: node value printString , ' | ' , child basename.
-		   node ]) sorted: #value descending
+	^ ((aFileReference children collect: [ :child |
+		    | node |
+		    node := HMValuedNode new
+			            rawModel: child;
+			            style: HMFileHeatMapStyle new;
+			            yourself.
+		    node layout: (self buildLayoutFor: node).
+		    child isDirectory
+			    ifTrue: [
+				    node addAll: (self hnodesFrom: child).
+				    node value: (node children
+						     ifEmpty: [ 0 ]
+						     ifNotEmpty: [ :children | children max: #value ]) ]
+			    ifFalse: [ node value: (self fileValueBlock value: child) ].
+		    (self collapseBlock value: node) ifTrue: [ node collapse ].
+		    node name: node value printString , ' | ' , child basename.
+		    node ]) reject: [ :node | self hideNodeBlock value: node ])
+		  sorted: #value descending
 ]
 
 { #category : #accessing }
@@ -126,7 +143,8 @@ HMFileHeatMap >> initialize [
 	super initialize.
 	maxValue := 0.
 	minValue := 0.
-	collapseBlock := [ :node | true ]
+	collapseBlock := [ :node | true ].
+	self hideNodeBlock: [ :file | false ]
 ]
 
 { #category : #accessing }
