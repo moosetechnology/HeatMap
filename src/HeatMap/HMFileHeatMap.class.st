@@ -94,10 +94,13 @@ HMFileHeatMap >> fileValueBlock: anObject [
 { #category : #building }
 HMFileHeatMap >> hnodesFrom: aFileReference [
 
-	^ aFileReference children collect: [ :child |
+	^ (aFileReference children collect: [ :child |
 		  | node |
 		  node := HMValuedNode new
 			          rawModel: child;
+			          layout: (RSFlowLayout new
+					           alignment: #middle;
+					           yourself);
 			          style: HMFileHeatMapStyle new;
 			          yourself.
 		  child isDirectory
@@ -107,7 +110,7 @@ HMFileHeatMap >> hnodesFrom: aFileReference [
 			  ifFalse: [ node value: (self fileValueBlock value: child) ].
 		  (self collapseBlock value: node) ifTrue: [ node collapse ].
 		  node name: node value printString , ' | ' , child basename.
-		  node ]
+		  node ]) sorted: #value descending 
 ]
 
 { #category : #accessing }
