@@ -33,7 +33,7 @@ HMFileHeatMap >> build [
 
 	colorPalette := NSScale linear
 		                range: {
-				                Color white.
+				                Smalltalk ui theme backgroundColor.
 				                Color red };
 		                domain: {
 				                0.
@@ -75,6 +75,7 @@ HMFileHeatMap >> hnodesFrom: aFileReference [
 		  node := HMValuedNode new
 			          rawModel: child;
 			          collapse;
+			          style: HMFileHeatMapStyle new;
 			          yourself.
 		  child isDirectory
 			  ifTrue: [
