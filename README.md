@@ -40,6 +40,49 @@ To use this heat map:
 
 You can also build a file heat map with the following piece of code:
 
+### Using GitModel
+
+```st
+
+glhModel := GLHModel new.
+
+glhApi := GLHApi new
+    privateToken: '<my token>';
+    baseAPIUrl:'<my base api>';
+    yourself.
+
+glhImporter := GLHModelImporter new
+    glhApi: glhApi;
+    glhModel: glhModel.
+
+"137 is the ID of the a Group, you can find the number in the webpage of every project and group"
+glhImporter importGroup: 131.
+
+myProject := ((glhModel allWithType: GLHProject) select: [ :project | project name = '<project name>' ]) anyOne.
+glhImporter importCommitsOf: myProject withStats: true until: '2023-01-01' asDate.
+
+
+bag := Bag new.
+myProject repository commits do: [ :aCommit |
+(NeoJSONObject fromString: (glhApi commitDiff: aCommit id ofProject: myProject id unidiff: false)) do: [:diffFile |
+        bag add: diffFile new_path asFileReference basename
+    ] ].
+
+
+fileHeatMap := HMFileHeatMap new.
+fileHeatMap rootDirectory: 'D:\Dev\my\path'.
+fileHeatMap hideNodeBlock: [ :node | node value < 20 ].
+fileHeatMap fileValueBlock: [ :child | bag occurrencesOf: child basename ].
+fileHeatMap collapseBlock: [ :node | node value <= 50 ].
+
+
+fileHeatMap build.
+fileHeatMap rootNode open. 
+
+```
+
+### Using Iceberg
+
 ```st
 "Set up iceberg to the git project to analyse"
 repo := IceLibgitRepository new
