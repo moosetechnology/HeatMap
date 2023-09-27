@@ -3,7 +3,7 @@
 
 - `childrenBlock:` isValued to determine the children of a model
 - `parentBlock:` isValued to determine the parent of a model when clicking on the center of the sunburst
-
+- `hideNodeBlock:` do not create child that answer true to the block 
 "
 Class {
 	#name : #HMHeatSunburstBuilder,
@@ -17,7 +17,8 @@ Class {
 		'parentBlock',
 		'root',
 		'colorMin',
-		'colorMax'
+		'colorMax',
+		'hideSliceBlock'
 	],
 	#category : #HeatMap
 }
@@ -26,9 +27,6 @@ Class {
 HMHeatSunburstBuilder >> build [
 
 	super build.
-
-
-	self rootNodes do: [ :node | self updateNodeValue: node ].
 	colorPalette := NSScale linear
 		                range: {
 				                self colorMin.
@@ -41,11 +39,12 @@ HMHeatSunburstBuilder >> build [
 
 	self rootNodes do: [ :node | self updateNodeColor: node ].
 	self setActions.
-	self shapes @ RSPopup.
+	self shapes @ RSPopup
 ]
 
 { #category : #api }
 HMHeatSunburstBuilder >> buildShapes [
+
 	self from: self root using: self childrenBlock.
 ]
 
@@ -97,12 +96,58 @@ HMHeatSunburstBuilder >> colorPalette: anObject [
 	colorPalette := anObject
 ]
 
+{ #category : #private }
+HMHeatSunburstBuilder >> createElements: atree using: ablock depth: depth [
+
+	| children shape |
+	shape := self shapeFor: atree.
+	shapes add: shape.
+
+	children := ablock rsValue: atree.
+	shape depth: depth.
+	children := children
+		            collect: [ :child |
+			            | e2 |
+			            e2 := self
+				                  createElements: child
+				                  using: ablock
+				                  depth: depth + 1.
+			            e2 sparent: shape.
+			            e2 ]
+		            as: Array.
+	children
+		ifEmpty: [
+			shape
+				propertyAt: #value
+				put: (self nodeValueBlock value: shape model) ]
+		ifNotEmpty: [ :childrn |
+			shape
+				propertyAt: #value
+				put: (childrn collect: [ :child | child propertyAt: #value ]) max ].
+	shape schildren:
+		(children reject: [ :child | self hideSliceBlock value: child ]).
+	^ shape
+]
+
+{ #category : #accessing }
+HMHeatSunburstBuilder >> hideSliceBlock [
+
+	^ hideSliceBlock
+]
+
+{ #category : #accessing }
+HMHeatSunburstBuilder >> hideSliceBlock: anObject [
+
+	hideSliceBlock := anObject
+]
+
 { #category : #initialization }
 HMHeatSunburstBuilder >> initialize [
 
 	super initialize.
 	colorMin := Smalltalk ui theme backgroundColor.
-	colorMax := Color red
+	colorMax := Color red.
+	hideSliceBlock := [ :el | false ]
 ]
 
 { #category : #accessing }
@@ -185,23 +230,6 @@ HMHeatSunburstBuilder >> updateNodeColor: node [
 
 	node schildren do: [ :child | self updateNodeColor: child ].
 	node color: (self colorPalette scale: (node propertyAt: #value))
-]
-
-{ #category : #accessing }
-HMHeatSunburstBuilder >> updateNodeValue: node [
-
-	node schildren
-		ifNotEmpty: [ :children |
-			children do: [ :child | self updateNodeValue: child ].
-			node
-				propertyAt: #value
-				put:
-				(node schildren collect: [ :child | child propertyAt: #value ])
-					max ]
-		ifEmpty: [
-			node
-				propertyAt: #value
-				put: (self nodeValueBlock value: node model) ]
 ]
 
 { #category : #building }
