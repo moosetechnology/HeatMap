@@ -33,7 +33,8 @@ Class {
 		'collapseBlock',
 		'hideNodeBlock',
 		'childrenBlock',
-		'root'
+		'root',
+		'nodeNameBlock'
 	],
 	#category : #HeatMap
 }
@@ -83,7 +84,7 @@ HMHeatMap >> childrenBlock: anObject [
 { #category : #building }
 HMHeatMap >> childrenFor: node [
 
-	^ self childrenBlock value: node rawValue
+	^ self childrenBlock value: node
 ]
 
 { #category : #accessing }
@@ -135,24 +136,27 @@ HMHeatMap >> hideNodeBlock: anObject [
 ]
 
 { #category : #building }
-HMHeatMap >> hnodesFrom: aFileReference [
+HMHeatMap >> hnodesFrom: parentNode [
 
-	^ ((aFileReference children collect: [ :child |
+	^ (((self childrenFor: parentNode) collect: [ :child |
 		    | node |
 		    node := HMValuedNode new
 			            rawModel: child;
 			            style: HMHeatMapStyle new;
 			            yourself.
 		    node layout: (self buildLayoutFor: node).
-		    child isDirectory
-			    ifTrue: [
-				    node addAll: (self hnodesFrom: child).
-				    node value: ((self childrenFor: node)
-						     ifEmpty: [ 0 ]
-						     ifNotEmpty: [ :children | children max: #value ]) ]
-			    ifFalse: [ node value: (self fileValueBlock value: child) ].
+
+		    node addAll: (self hnodesFrom: child).
+
+		    node children
+			    ifNotEmpty: [ :children | node value: (children max: #value) ]
+			    ifEmpty: [ node value: (self fileValueBlock value: child) ].
+
+
 		    (self collapseBlock value: node) ifTrue: [ node collapse ].
-		    node name: node value printString , ' | ' , child basename.
+		    node name:
+			    node value printString , ' | '
+			    , (self nodeNameBlock value: child).
 		    node ]) reject: [ :node | self hideNodeBlock value: node ])
 		  sorted: #value descending
 ]
@@ -164,7 +168,8 @@ HMHeatMap >> initialize [
 	maxValue := 0.
 	minValue := 0.
 	collapseBlock := [ :node | true ].
-	self hideNodeBlock: [ :file | false ]
+	self hideNodeBlock: [ :file | false ].
+	self nodeNameBlock: [ :node | node printString ]
 ]
 
 { #category : #accessing }
@@ -189,6 +194,18 @@ HMHeatMap >> minValue [
 HMHeatMap >> minValue: anObject [
 
 	minValue := anObject
+]
+
+{ #category : #accessing }
+HMHeatMap >> nodeNameBlock [
+
+	^ nodeNameBlock
+]
+
+{ #category : #accessing }
+HMHeatMap >> nodeNameBlock: anObject [
+
+	nodeNameBlock := anObject
 ]
 
 { #category : #accessing }
