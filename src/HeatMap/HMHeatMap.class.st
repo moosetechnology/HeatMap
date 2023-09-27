@@ -1,158 +1,211 @@
+"
+## Builder config
+
+**Mandatory**
+
+- `rootDirectory:`: the path to the directory root of the file heat map
+- `fileValueBlock:`: the way to compute the hot of a file
+
+**Optional**
+
+- `collapseBlock:`: executed after `fileValueBlock:`, it should return a boolean to indicate if the node should be collapse or not by default. Default value is true
+- `hideFileBlock:`: return `true` for the files that do not need to create a node in the visualisation
+
+## Example
+
+```st
+fileHeatMap := HMFileHeatMap new.
+fileHeatMap rootDirectory: '/path/to/directory'.
+fileHeatMap fileValueBlock: [ :child | child basename asString size ].
+fileHeatMap build.
+fileHeatMap rootNode open
+
+```
+"
 Class {
 	#name : #HMHeatMap,
-	#superclass : #HSimpleVisualizationBuilder,
+	#superclass : #HNodeBuilder,
 	#instVars : [
-		'elements',
-		'property',
-		'valueMax',
-		'valueMin',
-		'colorMax',
-		'colorMin'
+		'maxValue',
+		'minValue',
+		'colorPalette',
+		'fileValueBlock',
+		'collapseBlock',
+		'hideNodeBlock',
+		'childrenBlock',
+		'root'
 	],
 	#category : #HeatMap
 }
 
-{ #category : #'public - hooks' }
-HMHeatMap >> borderFor: node [
-
-	^ RSBorder new
-		  width: 1;
-		  capSquare;
-		  joinMiter;
-		  color: Smalltalk ui theme textColor;
-		  yourself
-]
-
 { #category : #building }
 HMHeatMap >> build [
 
-	self buildNodes.
-	super build.
-	self container @ RSCanvasController
-]
+	rootNode := HMValuedNode named: 'Root'.
+	rootNode addAll: (self hnodesFrom: self root).
+	rootNode value: (rootNode children sum: #value).
 
-{ #category : #building }
-HMHeatMap >> buildElementNode: anElement [
 
-	| elementValue |
-	elementValue := property value: anElement.
-	self updateValueRange: elementValue.
-
-	^ HMValuedNode new
-		  name: elementValue printString, ' | ', anElement printString;
-		  rawModel: anElement;
-		  value: elementValue;
-		  yourself
-]
-
-{ #category : #building }
-HMHeatMap >> buildNodes [
-
-	| allNodes |
-	rootNode := HNode new.
-	allNodes := elements collect: [ :elt | self buildElementNode: elt ].
 
 	colorPalette := NSScale linear
-		                range: { 
-				                colorMin.
-				                colorMax };
-		                domain: { 
-				                valueMin.
-				                valueMax };
+		                range: {
+				                Smalltalk ui theme backgroundColor.
+				                Color red };
+		                domain: {
+				                0.
+				                (rootNode children collect: #value) max };
 		                yourself.
 
-	allNodes do: [ :node | self updateNodeColor: node ].
-	rootNode addAll: (allNodes sorted: [ :a :b | a value < b value ]).
+	self updateNode: rootNode
+]
 
-	"super build"
+{ #category : #building }
+HMHeatMap >> buildLayoutFor: node [
+
+	^ RSFlowLayout new
+		alignment: #middle;
+		gapSize: 10;
+		yourself
 ]
 
 { #category : #accessing }
-HMHeatMap >> colorMax [
+HMHeatMap >> childrenBlock [
 
-	^ colorMax
+	^ childrenBlock
 ]
 
 { #category : #accessing }
-HMHeatMap >> colorMax: anObject [
+HMHeatMap >> childrenBlock: anObject [
 
-	colorMax := anObject
+	childrenBlock := anObject
+]
+
+{ #category : #building }
+HMHeatMap >> childrenFor: node [
+
+	^ self childrenBlock value: node rawValue
 ]
 
 { #category : #accessing }
-HMHeatMap >> colorMin [
+HMHeatMap >> collapseBlock [
 
-	^ colorMin
+	^ collapseBlock
 ]
 
 { #category : #accessing }
-HMHeatMap >> colorMin: anObject [
+HMHeatMap >> collapseBlock: anObject [
 
-	colorMin := anObject
+	collapseBlock := anObject
 ]
 
 { #category : #accessing }
-HMHeatMap >> elements [
+HMHeatMap >> colorPalette [
 
-	^ elements
+	^ colorPalette
 ]
 
 { #category : #accessing }
-HMHeatMap >> elements: anObject [
+HMHeatMap >> colorPalette: anObject [
 
-	elements := anObject
+	colorPalette := anObject
 ]
 
-{ #category : #initialization }
+{ #category : #accessing }
+HMHeatMap >> fileValueBlock [
+
+	^ fileValueBlock
+]
+
+{ #category : #accessing }
+HMHeatMap >> fileValueBlock: anObject [
+
+	fileValueBlock := anObject
+]
+
+{ #category : #accessing }
+HMHeatMap >> hideNodeBlock [
+
+	^ hideNodeBlock
+]
+
+{ #category : #accessing }
+HMHeatMap >> hideNodeBlock: anObject [
+
+	hideNodeBlock := anObject
+]
+
+{ #category : #building }
+HMHeatMap >> hnodesFrom: aFileReference [
+
+	^ ((aFileReference children collect: [ :child |
+		    | node |
+		    node := HMValuedNode new
+			            rawModel: child;
+			            style: HMHeatMapStyle new;
+			            yourself.
+		    node layout: (self buildLayoutFor: node).
+		    child isDirectory
+			    ifTrue: [
+				    node addAll: (self hnodesFrom: child).
+				    node value: ((self childrenFor: node)
+						     ifEmpty: [ 0 ]
+						     ifNotEmpty: [ :children | children max: #value ]) ]
+			    ifFalse: [ node value: (self fileValueBlock value: child) ].
+		    (self collapseBlock value: node) ifTrue: [ node collapse ].
+		    node name: node value printString , ' | ' , child basename.
+		    node ]) reject: [ :node | self hideNodeBlock value: node ])
+		  sorted: #value descending
+]
+
+{ #category : #accessing }
 HMHeatMap >> initialize [
 
 	super initialize.
-	valueMax := nil.
-	valueMin := nil.
-	colorMin := Color white.
-	colorMax := Color red.
-	elements := #(  ).
-	property := [ :elt | 0 ]
+	maxValue := 0.
+	minValue := 0.
+	collapseBlock := [ :node | true ].
+	self hideNodeBlock: [ :file | false ]
 ]
 
 { #category : #accessing }
-HMHeatMap >> property [
+HMHeatMap >> maxValue [
 
-	^ property
+	^ maxValue
 ]
 
 { #category : #accessing }
-HMHeatMap >> property: anObject [
+HMHeatMap >> maxValue: anObject [
 
-	property := anObject
-]
-
-{ #category : #building }
-HMHeatMap >> updateNodeColor: node [
-	node color: (colorPalette scale: node level).
-	node children do: [ :child| self updateNodeColor: child ].
-	
-]
-
-{ #category : #building }
-HMHeatMap >> updateValueRange: aValue [
-
-	valueMin
-		ifNil: [ valueMin := aValue ]
-		ifNotNil: [ valueMin := valueMin min: aValue ].
-	valueMax
-		ifNil: [ valueMax := aValue ]
-		ifNotNil: [ valueMax := valueMax max: aValue ]
+	maxValue := anObject
 ]
 
 { #category : #accessing }
-HMHeatMap >> valueMax [
+HMHeatMap >> minValue [
 
-	^ valueMax
+	^ minValue
 ]
 
 { #category : #accessing }
-HMHeatMap >> valueMin [
+HMHeatMap >> minValue: anObject [
 
-	^ valueMin
+	minValue := anObject
+]
+
+{ #category : #accessing }
+HMHeatMap >> root [
+
+	^ root
+]
+
+{ #category : #accessing }
+HMHeatMap >> root: anObject [
+
+	root := anObject
+]
+
+{ #category : #accessing }
+HMHeatMap >> updateNode: node [
+
+	node color: (self colorPalette scale: node value).
+	node children do: [ :child | self updateNode: child ]
 ]

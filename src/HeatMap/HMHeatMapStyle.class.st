@@ -1,11 +1,11 @@
 Class {
-	#name : #HMFileHeatMapStyle,
+	#name : #HMHeatMapStyle,
 	#superclass : #HDefaultStyle,
 	#category : #HeatMap
 }
 
 { #category : #'public - hooks' }
-HMFileHeatMapStyle >> borderFor: node [
+HMHeatMapStyle >> borderFor: node [
 
 	^ node hasChildren
 		  ifTrue: [
@@ -24,7 +24,7 @@ HMFileHeatMapStyle >> borderFor: node [
 ]
 
 { #category : #'public - hooks' }
-HMFileHeatMapStyle >> boxChildrenFor: anHNode [
+HMHeatMapStyle >> boxChildrenFor: anHNode [
 
 	^ RSBox new
 		  color: (self boxChildrenColorFor: anHNode);
