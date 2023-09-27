@@ -1,3 +1,10 @@
+"
+## API
+
+- `childrenBlock:` isValued to determine the children of a model
+- `parentBlock:` isValued to determine the parent of a model when clicking on the center of the sunburst
+
+"
 Class {
 	#name : #HMHeatSunburstBuilder,
 	#superclass : #RSSunburstBuilder,
@@ -7,6 +14,7 @@ Class {
 		'colorPalette',
 		'nodeValueBlock',
 		'childrenBlock',
+		'parentBlock',
 		'root',
 		'colorMin',
 		'colorMax'
@@ -134,6 +142,18 @@ HMHeatSunburstBuilder >> nodeValueBlock: anObject [
 ]
 
 { #category : #accessing }
+HMHeatSunburstBuilder >> parentBlock [
+
+	^ parentBlock
+]
+
+{ #category : #accessing }
+HMHeatSunburstBuilder >> parentBlock: anObject [
+
+	parentBlock := anObject
+]
+
+{ #category : #accessing }
 HMHeatSunburstBuilder >> root [
 
 	^ self rootNodes
@@ -148,7 +168,13 @@ HMHeatSunburstBuilder >> root: anObject [
 { #category : #building }
 HMHeatSunburstBuilder >> setActions [
 
-	self canvas shapes
+	self canvas shapes first
+		when: RSMouseClick
+		do: [ :evt |
+			self updateRootWith: (self parentBlock value: evt shape model) ]
+		for: self.
+
+	(self canvas shapes allButFirst reject: #isSLeaf)
 		when: RSMouseClick
 		do: [ :evt | self updateRootWith: evt shape model ]
 		for: self
@@ -229,5 +255,6 @@ HMHeatSunburstBuilder >> updateRootWith: aModel [
 					old
 						alphaAngle: 0;
 						betaAngle: 360 ].
-				old remove ] ]
+				old remove ] ].
+	self setActions.
 ]
