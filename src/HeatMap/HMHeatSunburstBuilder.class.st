@@ -14,7 +14,7 @@ Class {
 	#category : #HeatMap
 }
 
-{ #category : #accessing }
+{ #category : #building }
 HMHeatSunburstBuilder >> build [
 
 	super build.
@@ -31,7 +31,9 @@ HMHeatSunburstBuilder >> build [
 						                 slice propertyAt: #value ]) max };
 		                yourself.
 
-	self rootNodes do: [ :node | self updateNodeColor: node ]
+	self rootNodes do: [ :node | self updateNodeColor: node ].
+	self setActions.
+	self shapes @ RSPopup.
 ]
 
 { #category : #api }
@@ -143,6 +145,15 @@ HMHeatSunburstBuilder >> root: anObject [
 	self rootNodes: { anObject }
 ]
 
+{ #category : #building }
+HMHeatSunburstBuilder >> setActions [
+
+	self canvas shapes
+		when: RSMouseClick
+		do: [ :evt | self updateRootWith: evt shape model ]
+		for: self
+]
+
 { #category : #accessing }
 HMHeatSunburstBuilder >> updateNodeColor: node [
 
@@ -165,4 +176,58 @@ HMHeatSunburstBuilder >> updateNodeValue: node [
 			node
 				propertyAt: #value
 				put: (self nodeValueBlock value: node model) ]
+]
+
+{ #category : #building }
+HMHeatSunburstBuilder >> updateRootWith: aModel [
+
+	| lastShapes newShapes oshape |
+	lastShapes := self canvas shapes copy.
+	self root: aModel.
+	self buildShapes.
+	self build.
+	newShapes := self shapes.
+	newShapes size < lastShapes size
+		ifTrue: [
+			newShapes do: [ :new |
+				| old |
+				old := lastShapes shapeFromModel: new model.
+				old remove ].
+			oshape := lastShapes shapeFromModel: aModel.
+			lastShapes do: [ :old |
+				| new |
+				new := RSPieSlice new.
+				oshape betaAngle < old betaAngle ifTrue: [
+					new
+						alphaAngle: 360;
+						betaAngle: 360 ].
+				old depth = 1 ifTrue: [
+					new
+						alphaAngle: 0;
+						betaAngle: 360 ].
+				old remove ] ]
+		ifFalse: [
+			oshape := lastShapes
+				          ifEmpty: [ RSPieSlice new ]
+				          ifNotEmpty: [
+				          newShapes shapeFromModel: lastShapes first model ].
+			newShapes do: [ :new |
+				| old |
+				old := lastShapes shapeFromModel: new model.
+				old ifNil: [
+					old := RSPieSlice new.
+					oshape betaAngle < new betaAngle
+						ifTrue: [
+							old
+								alphaAngle: 360;
+								betaAngle: 360 ]
+						ifFalse: [
+							old
+								alphaAngle: 0;
+								betaAngle: 0 ] ].
+				new depth = 1 ifTrue: [
+					old
+						alphaAngle: 0;
+						betaAngle: 360 ].
+				old remove ] ]
 ]
