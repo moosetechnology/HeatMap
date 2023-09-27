@@ -17,6 +17,8 @@ You can also build an architectural heat map with the following piece of code:
 
 ### Using GitModel
 
+First load the [GitModel project](https://github.com/moosetechnology/GitProjectHealth)
+
 ```st
 glhModel := GLHModel new.
 
@@ -63,6 +65,8 @@ architecturalHeatMap rootNode open.
 ## Sunburst HeatMap
 
 ### Using GitModel
+
+First load the [GitModel project](https://github.com/moosetechnology/GitProjectHealth)
 
 ```st
 glhModel := GLHModel new.
