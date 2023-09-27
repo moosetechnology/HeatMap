@@ -36,14 +36,13 @@ To use this heat map:
     gitHeatMap open
     ```
 
-## File HeatMap
+## Architectural HeatMap
 
-You can also build a file heat map with the following piece of code:
+You can also build an architectural heat map with the following piece of code:
 
 ### Using GitModel
 
 ```st
-
 glhModel := GLHModel new.
 
 glhApi := GLHApi new
@@ -69,44 +68,65 @@ myProject repository commits do: [ :aCommit |
     ] ].
 
 
-fileHeatMap := HMFileHeatMap new.
-fileHeatMap rootDirectory: 'D:\Dev\my\path'.
-fileHeatMap hideNodeBlock: [ :node | node value < 20 ].
-fileHeatMap fileValueBlock: [ :child | bag occurrencesOf: child basename ].
-fileHeatMap collapseBlock: [ :node | node value <= 50 ].
+frPackage := (((myProject allWithType: FamixJavaPackage) select: [ :package | package parentPackage isNil ]) detect: [ :package | package name = 'fr' ]).
 
 
-fileHeatMap build.
-fileHeatMap rootNode open. 
+
+architecturalHeatMap := HMHeatMap new.
+architecturalHeatMap root: frPackage.
+architecturalHeatMap hideNodeBlock: [ :node | node value < 100 ].
+architecturalHeatMap fileValueBlock: [ :child | bag occurrencesOf: child name ].
+architecturalHeatMap childrenBlock: [ :node | node children select: [ :child | (child isKindOf: FamixJavaPackage) or: [ child isKindOf: FamixJavaClass ] ] ].
+architecturalHeatMap collapseBlock: [ :node | node value <= 5000 ].
+architecturalHeatMap nodeNameBlock: [ :node | node name ].
+
+architecturalHeatMap build.
+architecturalHeatMap rootNode open.
 
 ```
 
-### Using Iceberg
+## Sunburst HeatMap
+
+### Using GitModel
 
 ```st
-"Set up iceberg to the git project to analyse"
-repo := IceLibgitRepository new
-    name: 'seditRH';
-    location: ('D:\Dev\my\path' asFileReference);
-    initBare: false;
+glhModel := GLHModel new.
+
+glhApi := GLHApi new
+    privateToken: '<my token>';
+    baseAPIUrl:'<my base api>';
     yourself.
 
-"Analyse the git history to retrieve all file modified"
-gitFreq := HMGitFileFrequenceExtractor new
-    branchName: 'master';
-    repository: repo;
-    upToCommitish:  '<full commit id>';
-    yourself.
-gitFreq computeFrequences.
+glhImporter := GLHModelImporter new
+    glhApi: glhApi;
+    glhModel: glhModel.
 
-"Build a fileFeatMap upon this first analysis"
-fileHeatMap := HMFileHeatMap new.
-fileHeatMap rootDirectory: 'D:\Dev\my\path'.
+"137 is the ID of the a Group, you can find the number in the webpage of every project and group"
+glhImporter importGroup: 131.
 
-fileHeatMap hideNodeBlock: [ :node | node value < 20 ].
-fileHeatMap fileValueBlock: [ :child | gitFreq dictionnaryClassFrequence at: child basename ifAbsent: [ 0 ] ].
-fileHeatMap collapseBlock: [ :node | node value <= 50 ].
+myProject := ((glhModel allWithType: GLHProject) select: [ :project | project name = '<project name>' ]) anyOne.
+glhImporter importCommitsOf: myProject withStats: true until: '2023-01-01' asDate.
 
-fileHeatMap build.
-fileHeatMap rootNode open
+
+bag := Bag new.
+myProject repository commits do: [ :aCommit |
+(NeoJSONObject fromString: (glhApi commitDiff: aCommit id ofProject: myProject id unidiff: false)) do: [:diffFile |
+        bag add: diffFile new_path asFileReference basename
+    ] ].
+
+
+frPackage := (((myProject allWithType: FamixJavaPackage) select: [ :package | package parentPackage isNil ]) detect: [ :package | package name = 'fr' ]).
+
+sunburst := HMHeatSunburstBuilder new.
+sunburst root: frPackage.
+sunburst nodeValueBlock: [ :child | (bag occurrencesOf: child name) ].
+sunburst childrenBlock: [ :node | node children select: [ :child | (child isKindOf: FamixJavaPackage) or: [ child isKindOf: FamixJavaClass ] ] ].
+
+sunburst buildShapes.
+sunburst canvas @ RSCanvasController.
+sunburst build.
+sunburst shapes @ RSPopup.
+sunburst canvas
 ```
+
+![A sunburst example showing one part red for hot, and another part more gray](docs/sunburst.png)
