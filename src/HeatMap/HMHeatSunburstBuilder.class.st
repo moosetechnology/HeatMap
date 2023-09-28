@@ -19,7 +19,9 @@ Class {
 		'colorMin',
 		'colorMax',
 		'hideSliceBlock',
-		'popupNameText'
+		'popupNameText',
+		'nodeNameBlock',
+		'label'
 	],
 	#category : #HeatMap
 }
@@ -39,9 +41,14 @@ HMHeatSunburstBuilder >> build [
 		                yourself.
 
 	self rootNodes do: [ :node | self updateNodeColor: node ].
-	self setActions.
 	self shapes
-	@ (RSPopup text: [ :node | self popupNameText value: node ])
+	@ (RSPopup text: [ :node | self popupNameText value: node ]).
+	self setActions.
+
+	label := RSLabel new.
+	label text: 'fooo'.
+	label isFixed: true.
+	self canvas add: label
 ]
 
 { #category : #api }
@@ -150,7 +157,7 @@ HMHeatSunburstBuilder >> initialize [
 	colorMin := Smalltalk ui theme backgroundColor.
 	colorMax := Color red.
 	hideSliceBlock := [ :el | false ].
-	popupNameText := [ :el | el printString ]
+	nodeNameBlock := popupNameText := [ :el | el printString ].
 ]
 
 { #category : #accessing }
@@ -175,6 +182,18 @@ HMHeatSunburstBuilder >> minValue [
 HMHeatSunburstBuilder >> minValue: anObject [
 
 	minValue := anObject
+]
+
+{ #category : #accessing }
+HMHeatSunburstBuilder >> nodeNameBlock [
+
+	^ nodeNameBlock
+]
+
+{ #category : #accessing }
+HMHeatSunburstBuilder >> nodeNameBlock: anObject [
+
+	nodeNameBlock := anObject
 ]
 
 { #category : #accessing }
@@ -228,6 +247,9 @@ HMHeatSunburstBuilder >> root: anObject [
 { #category : #building }
 HMHeatSunburstBuilder >> setActions [
 
+	| interaction |
+	interaction := RSSunburstFadeInteraction new builder: self.
+
 	self canvas shapes first
 		when: RSMouseClick
 		do: [ :evt |
@@ -237,7 +259,23 @@ HMHeatSunburstBuilder >> setActions [
 	(self canvas shapes allButFirst reject: #isSLeaf)
 		when: RSMouseClick
 		do: [ :evt | self updateRootWith: evt shape model ]
-		for: self
+		for: self.
+
+	self canvas shapes
+		when: RSMouseEnter do: [ :evt |
+			| path |
+			path := (interaction pathFor: evt shape) reverse.
+			path := String streamContents: [ :s |
+					        path
+						        do: [ :node |
+							        s << (self nodeNameBlock value: node model) ]
+						        separatedBy: [ s << '>>' ] ].
+			label
+				text: path;
+				signalUpdate.
+			label position: label extent / 2 ]
+		for: self;
+		when: RSMouseLeave do: [ :evt | label text: '' ] for: self
 ]
 
 { #category : #accessing }
