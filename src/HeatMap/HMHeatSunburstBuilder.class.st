@@ -18,7 +18,8 @@ Class {
 		'root',
 		'colorMin',
 		'colorMax',
-		'hideSliceBlock'
+		'hideSliceBlock',
+		'popupNameText'
 	],
 	#category : #HeatMap
 }
@@ -39,7 +40,8 @@ HMHeatSunburstBuilder >> build [
 
 	self rootNodes do: [ :node | self updateNodeColor: node ].
 	self setActions.
-	self shapes @ RSPopup
+	self shapes
+	@ (RSPopup text: [ :node | self popupNameText value: node ])
 ]
 
 { #category : #api }
@@ -147,7 +149,8 @@ HMHeatSunburstBuilder >> initialize [
 	super initialize.
 	colorMin := Smalltalk ui theme backgroundColor.
 	colorMax := Color red.
-	hideSliceBlock := [ :el | false ]
+	hideSliceBlock := [ :el | false ].
+	popupNameText := [ :el | el printString ]
 ]
 
 { #category : #accessing }
@@ -196,6 +199,18 @@ HMHeatSunburstBuilder >> parentBlock [
 HMHeatSunburstBuilder >> parentBlock: anObject [
 
 	parentBlock := anObject
+]
+
+{ #category : #accessing }
+HMHeatSunburstBuilder >> popupNameText [
+
+	^ popupNameText
+]
+
+{ #category : #accessing }
+HMHeatSunburstBuilder >> popupNameText: anObject [
+
+	popupNameText := anObject
 ]
 
 { #category : #accessing }
