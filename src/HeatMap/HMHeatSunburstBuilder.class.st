@@ -21,7 +21,8 @@ Class {
 		'hideSliceBlock',
 		'popupNameText',
 		'nodeNameBlock',
-		'label'
+		'label',
+		'maxDomainValue'
 	],
 	#category : #HeatMap
 }
@@ -34,13 +35,15 @@ HMHeatSunburstBuilder >> build [
 		                range: {
 				                self colorMin.
 				                self colorMax };
-		                domain: {
-				                0.
-				                (self rootNodes collect: [ :slice |
-						                 slice propertyAt: #value ]) max };
 		                yourself.
+	RSNormalizer color
+		scale: colorPalette;
+		shapes: self shapes;
+		normalize: [ :el |
+			self maxDomainValue
+				ifNotNil: [ :max | (self nodeValueBlock value: el) min: max ]
+				ifNil: [ self nodeValueBlock value: el ] ].
 
-	self rootNodes do: [ :node | self updateNodeColor: node ].
 	self shapes
 	@ (RSPopup text: [ :node | self popupNameText value: node ]).
 	self setActions.
@@ -124,17 +127,8 @@ HMHeatSunburstBuilder >> createElements: atree using: ablock depth: depth [
 			            e2 sparent: shape.
 			            e2 ]
 		            as: Array.
-	children
-		ifEmpty: [
-			shape
-				propertyAt: #value
-				put: (self nodeValueBlock value: shape model) ]
-		ifNotEmpty: [ :childrn |
-			shape
-				propertyAt: #value
-				put: (childrn collect: [ :child | child propertyAt: #value ]) max ].
 	shape schildren:
-		(children reject: [ :child | self hideSliceBlock value: child ]).
+		(children reject: [ :child | self hideSliceBlock value: child model ]).
 	^ shape
 ]
 
@@ -158,6 +152,20 @@ HMHeatSunburstBuilder >> initialize [
 	colorMax := Color red.
 	hideSliceBlock := [ :el | false ].
 	nodeNameBlock := popupNameText := [ :el | el printString ].
+]
+
+{ #category : #accessing }
+HMHeatSunburstBuilder >> maxDomainValue [
+
+	^ maxDomainValue ifNil: [
+		  self rootNodes max: [ :slice |
+			  self nodeValueBlock value: slice model ] ]
+]
+
+{ #category : #accessing }
+HMHeatSunburstBuilder >> maxDomainValue: anObject [
+
+	maxDomainValue := anObject
 ]
 
 { #category : #accessing }
@@ -276,13 +284,6 @@ HMHeatSunburstBuilder >> setActions [
 			label position: label extent / 2 ]
 		for: self;
 		when: RSMouseLeave do: [ :evt | label text: '' ] for: self
-]
-
-{ #category : #accessing }
-HMHeatSunburstBuilder >> updateNodeColor: node [
-
-	node schildren do: [ :child | self updateNodeColor: child ].
-	node color: (self colorPalette scale: (node propertyAt: #value))
 ]
 
 { #category : #building }
