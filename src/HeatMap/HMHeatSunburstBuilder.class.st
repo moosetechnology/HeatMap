@@ -29,7 +29,7 @@ Class {
 
 { #category : #building }
 HMHeatSunburstBuilder >> build [
-
+	self buildShapes.
 	super build.
 	colorPalette := NSScale linear
 		                range: {
