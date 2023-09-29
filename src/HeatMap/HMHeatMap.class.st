@@ -29,12 +29,12 @@ Class {
 		'maxValue',
 		'minValue',
 		'colorPalette',
-		'fileValueBlock',
 		'collapseBlock',
 		'hideNodeBlock',
 		'childrenBlock',
 		'root',
-		'nodeNameBlock'
+		'nodeNameBlock',
+		'nodeValueBlock'
 	],
 	#category : #HeatMap
 }
@@ -112,18 +112,6 @@ HMHeatMap >> colorPalette: anObject [
 ]
 
 { #category : #accessing }
-HMHeatMap >> fileValueBlock [
-
-	^ fileValueBlock
-]
-
-{ #category : #accessing }
-HMHeatMap >> fileValueBlock: anObject [
-
-	fileValueBlock := anObject
-]
-
-{ #category : #accessing }
 HMHeatMap >> hideNodeBlock [
 
 	^ hideNodeBlock
@@ -150,7 +138,7 @@ HMHeatMap >> hnodesFrom: parentNode [
 
 		    node children
 			    ifNotEmpty: [ :children | node value: (children max: #value) ]
-			    ifEmpty: [ node value: (self fileValueBlock value: child) ].
+			    ifEmpty: [ node value: (self nodeValueBlock value: child) ].
 
 
 		    (self collapseBlock value: node) ifTrue: [ node collapse ].
@@ -206,6 +194,18 @@ HMHeatMap >> nodeNameBlock [
 HMHeatMap >> nodeNameBlock: anObject [
 
 	nodeNameBlock := anObject
+]
+
+{ #category : #accessing }
+HMHeatMap >> nodeValueBlock [
+
+	^ nodeValueBlock
+]
+
+{ #category : #accessing }
+HMHeatMap >> nodeValueBlock: anObject [
+
+	nodeValueBlock := anObject
 ]
 
 { #category : #accessing }
