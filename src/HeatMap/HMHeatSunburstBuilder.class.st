@@ -29,6 +29,7 @@ Class {
 
 { #category : #building }
 HMHeatSunburstBuilder >> build [
+
 	self buildShapes.
 	super build.
 	colorPalette := NSScale linear
@@ -44,14 +45,15 @@ HMHeatSunburstBuilder >> build [
 				ifNotNil: [ :max | (self nodeValueBlock value: el) min: max ]
 				ifNil: [ self nodeValueBlock value: el ] ].
 
+
 	self shapes
 	@ (RSPopup text: [ :node | self popupNameText value: node ]).
 	self setActions.
-
-	label := RSLabel new.
-	label text: 'fooo'.
-	label isFixed: true.
-	self canvas add: label
+	label ifNil: [
+		label := RSLabel new.
+		label text: 'fooo'.
+		label isFixed: true.
+		self canvas add: label ]
 ]
 
 { #category : #api }
