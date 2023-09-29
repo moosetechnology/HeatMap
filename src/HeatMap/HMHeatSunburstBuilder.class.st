@@ -29,6 +29,7 @@ Class {
 { #category : #building }
 HMHeatSunburstBuilder >> build [
 
+	self buildShapes.
 	super build.
 	colorPalette := NSScale linear
 		                range: {
@@ -291,7 +292,6 @@ HMHeatSunburstBuilder >> updateRootWith: aModel [
 	| lastShapes newShapes oshape |
 	lastShapes := self canvas shapes copy.
 	self root: aModel.
-	self buildShapes.
 	self build.
 	newShapes := self shapes.
 	newShapes size < lastShapes size
